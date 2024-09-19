@@ -9,42 +9,62 @@ const JWT_SECRET = "test123";
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({
+app.use(
+  cors({
     credentials: true,
-    origin: "http://localhost:5173"
-}));
+    origin: "http://localhost:5173",
+  })
+);
 
+app.post("/signup", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  // do db validations, fetch id of user from db
+  const token = jwt.sign(
+    {
+      id: Math.random().toPrecision(),
+    },
+    JWT_SECRET
+  );
+  res.cookie("token", token);
+  //   res.send("Logged in!");
+  res.json({ msg: "You are signed up!", token, password });
+});
 app.post("/signin", (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
-    // do db validations, fetch id of user from db
-    const token = jwt.sign({
-        id: 1
-    }, JWT_SECRET);
-    res.cookie("token", token);
-    res.send("Logged in!");
+  const email = req.body.email;
+  const password = req.body.password;
+  // do db validations, fetch id of user from db
+  const token = jwt.sign(
+    {
+      id: Math.random().toPrecision(),
+    },
+    JWT_SECRET
+  );
+  res.cookie("token", token);
+  //   res.send("Logged in!");
+  res.json({ msg: "You are logged in!", token });
 });
 
 app.get("/user", (req, res) => {
-    const token = req.cookies.token;
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
-    // Get email of the user from the database
-    res.send({
-        userId: decoded.id
-    })
+  const token = req.cookies.token;
+  const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+  // Get email of the user from the database
+  res.send({
+    userId: decoded.id,
+  });
 });
-
 
 app.post("/logout", (req, res) => {
-    res.cookie("token", "ads");
-    res.json({
-        message: "Logged out!"
-    })
+  res.cookie("token", "ads");
+  res.json({
+    message: "Logged out!",
+  });
 });
 
-
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../src/index.html"))
-})
+  res.sendFile(path.join(__dirname, "../src/index.html"));
+});
 
-app.listen(3000);
+app.listen(3000, () => {
+  console.log("Server listening on port 3000.");
+});
